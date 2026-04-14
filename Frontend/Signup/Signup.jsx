@@ -26,7 +26,7 @@ export default function signup() {
             <div className="center">
             <div className="login-box">
 
-                <div className="signup-header" id="center">
+                <div className="signup-header">
                     <h2 className="signup-title">Signup</h2>
                 </div>
 
