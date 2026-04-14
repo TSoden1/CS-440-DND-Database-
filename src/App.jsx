@@ -2,10 +2,15 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
+import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import './App.css'
+import Login from '../Frontend/Login/Login.jsx'
+import Signup from '../Frontend/Signup/Signup.jsx'
+
+
 
 function App() {
-
 
   return (
     <>
@@ -28,7 +33,8 @@ function App() {
 
           <div>
             <label>Login to your account!</label>
-            <button className="nav-login">Login</button>
+            <button className="nav-login" onClick={() => navigate("/Login")}>Login</button>
+            
           </div>
 
         </div>
