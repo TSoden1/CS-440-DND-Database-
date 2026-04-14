@@ -1,5 +1,6 @@
-import { useState } from "react";
-import './Signup.css';
+import { useState } from "react"
+import { useNavigate } from 'react-router-dom'
+import './Signup.css'
 
 
 export default function signup() {
@@ -15,6 +16,8 @@ export default function signup() {
             return;
         }
     };
+
+    const navigate = useNavigate();
 
     return(
         <>
@@ -63,7 +66,7 @@ export default function signup() {
 
                 <div className="has-account">
                     <text>Already have an account?</text>
-                    <button className ="link" onClick={()=> alert("FINISH THE CONNECTION WHEN LOGIN WORKS LOL")}>Login</button>
+                    <button className ="link" onClick={() => navigate("/Login")}>Login</button>
                 </div>
 
 

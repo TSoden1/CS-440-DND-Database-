@@ -11,6 +11,7 @@ import Signup from '../Frontend/Signup/Signup.jsx'
 
 
 function App() {
+const navigate = useNavigate();
 
   return (
     <>
@@ -28,7 +29,7 @@ function App() {
 
           <div>
             <label>Signup for an account!</label>
-            <button className="nav-signup">Signup</button>
+            <button className="nav-signup"onClick={() => navigate("/Signup")}>Signup</button>
           </div>
 
           <div>
