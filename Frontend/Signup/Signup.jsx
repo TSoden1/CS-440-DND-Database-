@@ -49,7 +49,7 @@ export default function signup() {
                 </div>
 
                 <div>
-                    <button className="signup-button">Signup</button>
+                    <button className="signup-button" onClick={() => navigate("/Profile")}>Signup</button>
                 </div>
 
                 <div className="has-account">
