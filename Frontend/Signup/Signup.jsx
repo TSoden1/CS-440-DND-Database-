@@ -4,19 +4,7 @@ import './Signup.css'
 
 
 export default function signup() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [error, setError] = useState("");
-
-    const handleSignup = () => {
-        setError(" ");
-        if (!username.trim() || !password.trim() || !email.trim()) {
-            setError("Please fill in all fields.");
-            return;
-        }
-    };
-
+    
     const navigate = useNavigate();
 
     return(
