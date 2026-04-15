@@ -3,6 +3,10 @@
     flex-direction: column;
     min-height: 100vh;
     background: #e0e0e0;
+    width: 100vw;
+    justify-content: flex-end;
+    position: fixed;
+    right: 0;
 }
 
 .header{
@@ -45,6 +49,7 @@ label{
     font-size: 1.0rem;
     margin-bottom:30px;
     cursor: pointer;
+    border-radius: 100px;
 }
 
 .nav-login{
@@ -53,4 +58,5 @@ label{
   padding: 10px 105px;
   font-size: 1.0rem;
   cursor: pointer;
+  border-radius: 100px;
 }
