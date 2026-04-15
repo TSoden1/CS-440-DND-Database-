@@ -59,7 +59,7 @@ export default function login() {
 
                 
                 <div>
-                    <button className="login-button">Login</button>
+                    <button className="login-button" onClick={() => navigate ("/Profile")}>Login</button>
                 </div>
 
 
