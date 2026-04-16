@@ -4,18 +4,7 @@ import './Login.css'
 
 
 export default function login() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-
-    const handleLogin = () => {
-        setError(" ");
-        if (!username.trim() || !password.trim()) {
-            setError("Please fill in both fields.");
-            return;
-        }
-    };
-
+ 
     const navigate = useNavigate();
 
     return(
@@ -59,7 +48,7 @@ export default function login() {
 
                 
                 <div>
-                    <button className="login-button">Login</button>
+                    <button className="login-button" onClick={() => navigate ("/Profile")}>Login</button>
                 </div>
 
 
