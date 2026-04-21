@@ -1,19 +1,58 @@
 import { useNavigate } from "react-router-dom";
+import {useState} from "react";
 import './campaigns.css'
 export default function campaigns() {
-
     const navigate = useNavigate();
+    const [campaigns, setCampaigns] = useState([]);
+    const [showPopup, setShowPopup] = useState(false);
 
+    const [formValues, setFormValues] = useState({
+        userName: "",
+        charName: "",
+        meetTime: ""
+    });
+
+    const handleInput = (e) => {
+        const {name, value } = e.target;
+
+        setFormValues({
+            ...formValues,
+            [name]: value
+        });
+    };
+
+    const newCampaign = () => {
+        setCampaigns([...campaigns, formValues]);
+
+        setFormValues({userName:"", charName:"", meetTime:""});
+
+        setShowPopup(false);
+    }
+
+    const closePopup = () => {
+        setShowPopup(false);
+    }
+
+
+
+   
+        
 return(
 <>
 <div class="page">
         <title>Campaigns</title>
+        <div className="nav-bar">
+            <h4>Profile</h4>
+            <h4>Characters</h4>
+            <h4>Campaigns</h4>
+        </div>
     <div className="main-header">
         <div className="spacer" /><h1>My Campaigns</h1>
         <br></br>
         <br></br>
+
         <div className="add-campaign-menu">
-            <input type="button" id="add-campaign-button" />
+            <button onClick={() => setShowPopup(true)}>+</button>
         </div>
     </div>
 
@@ -36,7 +75,7 @@ return(
                 <h2>Finished:</h2>
             </div>
         </div>
-
+{/* 
         <div className="campaign-item-container container">
             <div className="campaign-item">Frank</div>
             <div className="campaign-item">Ricky</div>
@@ -48,9 +87,51 @@ return(
             <div className="campaign-item">
                 <input type="checkbox" id="finsihed-checkbox" name="finished-checkbox"/>
             </div>
+        </div> */}
+
+        <div>
+            {campaigns.map((c, i) => (
+                <div key={i} className="campaign-item-container container">
+                    <div className="campaign-item">{c.userName}</div>
+                    <div className="campaign-item">{c.charName}</div>
+                    <div className="campaign-item">{c.meetTime}</div>
+                    
+                    <div className="campaign-item">
+                        <input type="checkbox" name="started-checkbox" />
+                    </div>
+                    
+                    <div className="campaign-item">
+                        <input type="checkbox" name="finished-checkbox"/>
+                    </div>
+                </div>            
+            ))}
         </div>
   </div>
   </div>
+
+{showPopup && (
+    <div className="pop-up-overlay">
+        <div className="pop-up-menu">
+            <div className="closeBtn">
+                <button onClick={closePopup}>X</button>
+            </div>
+
+            <h3>Enter in Your Name:</h3>
+            <input name="userName" value={FormData.userName} onChange={handleInput} type="text" />
+
+            <h3>Enter Your Character Name:</h3>
+            <input name="charName" value={FormData.charName} onChange={handleInput} type="text" />
+
+            <h3>Enter in the Meet Time:</h3>
+            <input name="meetTime" value={FormData.meetTime} onChange={handleInput} type="text" />
+
+            <br />
+
+            <button onClick={newCampaign}>Submit</button>
+        </div>
+    </div>
+        )}
+    
 </>
 );
 }

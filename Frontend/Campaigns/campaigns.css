@@ -56,4 +56,28 @@
     gap: 50px;
 }
 
+.pop-up-menu {
+    position: fixed;
+    background-color: white;
+    max-width: 400px;
+    padding: 2rem;
+    border: 2px solid #900B09;
+}
 
+.pop-up-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+
+}
+
+.closeBtn {
+    display: flex;
+    justify-content: flex-end;
+}
