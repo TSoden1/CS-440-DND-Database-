@@ -66,7 +66,6 @@ CREATE TABLE User_Campaigns (
     so i need to ask some questions
 
     Make sure you go back and look at the primary keys and the foreign keys shit like that
-
 */
 
 INSERT INTO Users (Name, Email, Username)
