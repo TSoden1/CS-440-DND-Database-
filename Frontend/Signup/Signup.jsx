@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import './Signup.css'
-import axios from 'axios'
+const axios = require('axios');
 
 export default function signup() {
     const [username, setUsername] = useState("");
@@ -88,7 +88,7 @@ export default function signup() {
                 </div>
 
                 <div>
-                    <button className="signup-button" onClick={handleSignup}>Signup</button>
+                    <button className="signup-button" *onClick={handleSignup}>Signup</button>
                 </div>
 
                 <div className="has-account">
