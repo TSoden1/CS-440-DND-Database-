@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import './Signup.css'
-
+import axios from 'axios'
 
 export default function signup() {
     const [username, setUsername] = useState("");
@@ -9,15 +9,38 @@ export default function signup() {
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
 
-    const handleSignup = () => {
-        setError(" ");
+    const navigate = useNavigate();
+
+    const handleSignup = async (e) => {
+        e.preventDefault();
+        setError("");
+
         if (!username.trim() || !password.trim() || !email.trim()) {
             setError("Please fill in all fields.");
             return;
         }
-    };
 
-    const navigate = useNavigate();
+        if (password.length < 8) {
+            setError("Password must be at least 8 characters.");
+            return;
+        }
+
+        try {
+            const response = await axios.post('http://localhost:5174/Signup', {
+                username,
+                email,
+                password
+            });
+
+            if (response.status === 200) {
+                alert("Account created successfully!");
+                navigate("/Login");
+            }
+        } catch (err) {
+            console.error(err);
+            setError(err.response?.data || "Signup failed. Please try again.");
+        }
+    };
 
     return(
         <>
@@ -37,7 +60,9 @@ export default function signup() {
                     <label>Email</label>
                     <input
                         type="email"
-                        placeholder="Enter a valid email">
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter a valid email">
                     </input>
                 </div>
 
@@ -45,7 +70,8 @@ export default function signup() {
                     <label>Username</label>
                     <input
                         type="text"
-                        minlength="1"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         maxLength="20"
                         placeholder="Enter a valid username">
                     </input>
@@ -55,13 +81,14 @@ export default function signup() {
                     <label>Password</label>
                     <input 
                         type="password"
-                        minlength="8"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter password">
                     </input>
                 </div>
 
                 <div>
-                    <button className="signup-button">Signup</button>
+                    <button className="signup-button" onClick={handleSignup}>Signup</button>
                 </div>
 
                 <div className="has-account">
