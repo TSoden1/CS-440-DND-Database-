@@ -1,6 +1,7 @@
-const express = require('express');
-const mysql = require('mysql');
-const cors = require('cors');
+import express from 'express';
+import mysql from 'mysql2';
+import cors from 'cors';
+
 
 const app = express();
 app.use(cors());
@@ -14,20 +15,26 @@ const db = mysql.createConnection({
     database: "DNDatabase"
 });
 
+db.connect();
+
 app.post('/Signup', (req, res) => {
-    const sql = "INSERT INTO USERS (email, username, password) Values (?, ?, ?)";
+    const sql = "INSERT INTO users (username, displayName, email, password) VALUES (?, ?, ?, ?)";
     const values = [
-        req.body.email,
         req.body.username,
+        req.body.displayName,
+        req.body.email,
         req.body.password
     ];
-    db.query(sql, [values], (err, data) => {
-        if(err) return res.json("Signup Failed");
+    db.query(sql, values, (err, data) => {
+        if(err) {
+            console.error(err);
+            return res.json("Signup Failed");
+        }
         return res.json(data);
     });
 });
 
-app.listen(5174, () => {
+app.listen(5173, () => {
     console.log("Listening for connection");
 });
 

@@ -1,13 +1,15 @@
 import { useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import './Signup.css'
-const axios = require('axios');
+import axios from "axios"
 
-export default function signup() {
+
+export default function Signup() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
+    const [displayName, setDisplayName] = useState("");
 
     const navigate = useNavigate();
 
@@ -15,26 +17,27 @@ export default function signup() {
         e.preventDefault();
         setError("");
 
-        if (!username.trim() || !password.trim() || !email.trim()) {
-            setError("Please fill in all fields.");
-            return;
-        }
+        // if (!username.trim() || !password.trim() || !email.trim()) {
+        //     setError("Please fill in all fields.");
+        //     return;
+        // }
 
-        if (password.length < 8) {
-            setError("Password must be at least 8 characters.");
-            return;
-        }
+        // if (password.length < 8) {
+        //     setError("Password must be at least 8 characters.");
+        //     return;
+        // }
 
         try {
-            const response = await axios.post('http://localhost:5174/Signup', {
+            const response = await axios.post('http://localhost:5173/Signup', {
                 username,
+                displayName,
                 email,
                 password
             });
 
             if (response.status === 200) {
                 alert("Account created successfully!");
-                navigate("/Login");
+                navigate("/Login"); //MAKE THIS NAV TO PROFILE
             }
         } catch (err) {
             console.error(err);
@@ -78,6 +81,17 @@ export default function signup() {
                 </div>
 
                 <div className="user-input">
+                    <label>Display Name</label>
+                    <input
+                        type="text"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        maxLength="20"
+                        placeholder="Enter a valid display name">
+                    </input>
+                </div>
+
+                <div className="user-input">
                     <label>Password</label>
                     <input 
                         type="password"
@@ -88,7 +102,7 @@ export default function signup() {
                 </div>
 
                 <div>
-                    <button className="signup-button" *onClick={handleSignup}>Signup</button>
+                    <button className="signup-button" onClick={handleSignup}>Signup</button>
                 </div>
 
                 <div className="has-account">
@@ -96,8 +110,6 @@ export default function signup() {
                     <button className ="link" onClick={() => navigate("/Login")}>Login</button>
                 </div>
 
-
-                
                 </div>
             </div>        
         </div>
