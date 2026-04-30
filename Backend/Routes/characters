@@ -1,0 +1,81 @@
+const express = require("express");
+const router = express.Router();
+const db = require("../db");
+
+//CREATE character (transaction to ensure both inserts succeed)
+router.post("/", async (req, res) => {
+  const conn = await db.getConnection();
+  const { userID, characterName, className, race, charLevel, background, hp } = req.body;
+
+  try {
+    await conn.beginTransaction();
+
+    const [result] = await conn.query(
+      `INSERT INTO characters 
+       (characterName, class, races, charLevel, background, hp)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [characterName, className, race, charLevel, background, hp]
+    );
+
+    await conn.query(
+      "INSERT INTO userCharacters (userID, characterID) VALUES (?, ?)",
+      [userID, result.insertId]
+    );
+
+    await conn.commit();
+    res.json({ success: true });
+
+  } catch (err) {
+    await conn.rollback();
+    res.status(500).json(err);
+  } finally {
+    conn.release();
+  }
+});
+
+
+//GET user characters
+router.get("/user/:userID", async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT c.*
+       FROM characters c
+       JOIN userCharacters uc ON c.characterID = uc.characterID
+       WHERE uc.userID = ?`,
+      [req.params.userID]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+
+//DELETE character
+router.delete("/:characterID", async (req, res) => {
+  try {
+    await db.query(
+      "DELETE FROM characters WHERE characterID = ?",
+      [req.params.characterID]
+    );
+    res.json({ message: "Character deleted" });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+//UPDATE character
+router.put("/:characterID", async (req, res) => {
+  const { characterName, className, race, charLevel, background, hp } = req.body;
+
+  await db.query(
+    `UPDATE characters 
+     SET characterName=?, class=?, races=?, charLevel=?, background=?, hp=?
+     WHERE characterID=?`,
+    [characterName, className, race, charLevel, background, hp, req.params.characterID]
+  );
+
+  res.json({ message: "Updated" });
+});
+
+module.exports = router;
