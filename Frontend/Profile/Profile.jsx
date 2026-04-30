@@ -1,95 +1,71 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCurrentProfile } from "./profileAPI.js";
 import "./Profile.css";
 
-const USERS = Object.freeze([
-    {
-        id: 1,
-        username: "GoldenTek",
-        email: "wrig@gmail.com",
-        firstName: "Tyler",
-        lastName: "Wright"
-    }
-]);
-
-const CHARACTERS = Object.freeze([
-    {
-        player: "GoldenTek",
-        name: "Wrig",
-        className: "Paladin",
-        race: "Hill Dwarf",
-        level: 5,
-        background: "Acolyte",
-        hp: 52
-    },
-    {
-        player: "GoldenTek",
-        name: "Danimal",
-        className: "Worlock",
-        race: "Dark Elf",
-        level: 5,
-        background: "Acolyte",
-        hp: 23
-    }
-]);
-
-const CAMPAIGNS = Object.freeze([
-    {
-        players: "GoldenTek",
-        characters: "Wrig",
-        meetingTime: "6:00 PM",
-        started: "2026-02-01",
-        completed: false,
-        dmId: 3245
-    },
-    {
-        players: "GoldenTek",
-        characters: "Bryan",
-        meetingTime: "9:00 PM",
-        started: "2026-03-31",
-        completed: true,
-        dmId: 4902
-    }
-]);
-
-const CLASS_INFO = Object.freeze({
-    Paladin: {
-        primaryAbility: "Strength / Charisma",
-        hitPointDie: "d10",
-        savingThrowProficiencies: "Wisdom, Charisma",
-        skillProficiencies: "Choose 2",
-        weaponProficiencies: "Simple, Martial",
-        armorProficiencies: "All armor, Shields"
-    },
-    Worlock: {
-        primaryAbility: "Charisma",
-        hitPointDie: "d8",
-        savingThrowProficiencies: "Wisdom, Charisma",
-        skillProficiencies: "Choose 2",
-        weaponProficiencies: "Simple",
-        armorProficiencies: "Light armor"
-    }
-});
-
-const RACE_INFO = Object.freeze({
-    "Hill Dwarf": {
-        size: "Medium",
-        type: "Humanoid",
-        speed: 25
-    },
-    "Dark Elf": {
-        size: "Medium",
-        type: "Humanoid",
-        speed: 30
-    }
-});
-
 function formatCompleted(completed) {
-    return completed ? "True" : "False";
+    if (completed === true) {
+        return "True";
+    }
+
+    if (completed === false) {
+        return "False";
+    }
+
+    return "Not provided";
+}
+
+function getValue(value) {
+    return value || "Not provided";
+}
+
+function getUserDisplayName(user) {
+    const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+
+    return fullName || user.username || user.email || "Profile";
+}
+
+function getCharacterName(character) {
+    return character.name || character.characterName || "Unnamed Character";
+}
+
+function getCharacterClass(character) {
+    return character.className || character.class || "Not provided";
+}
+
+function getCampaignTitle(campaign) {
+    return (
+        campaign.name ||
+        campaign.campaignName ||
+        campaign.characters ||
+        campaign.characterName ||
+        campaign.charName ||
+        "Campaign"
+    );
+}
+
+function getCampaignCharacter(campaign) {
+    return campaign.characters || campaign.characterName || campaign.charName || "Not provided";
+}
+
+function getCampaignMeetingTime(campaign) {
+    return campaign.meetingTime || campaign.meetTime || "Not provided";
+}
+
+function getCampaignPlayer(campaign) {
+    return campaign.players || campaign.player || campaign.userName || "Not provided";
+}
+
+function getCampaignStarted(campaign) {
+    return campaign.started || campaign.startDate || "Not provided";
 }
 
 export default function Profile() {
     const navigate = useNavigate();
+
+    const [profileData, setProfileData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const [openAccount, setOpenAccount] = useState(false);
     const [openCharacter, setOpenCharacter] = useState(null);
@@ -97,39 +73,113 @@ export default function Profile() {
     const [openClassSections, setOpenClassSections] = useState({});
     const [openRaceSections, setOpenRaceSections] = useState({});
 
-    const currentUser = USERS[0];
+    useEffect(() => {
+        let ignore = false;
 
-    const currentCharacters = useMemo(
-        () => CHARACTERS.filter((character) => character.player === currentUser.username),
-        [currentUser.username]
-    );
+        async function loadProfile() {
+            try {
+                setLoading(true);
+                setError("");
 
-    const currentCampaigns = useMemo(
-        () => CAMPAIGNS.filter((campaign) => campaign.players === currentUser.username),
-        [currentUser.username]
-    );
+                const data = await getCurrentProfile();
 
-    const toggleCharacter = (characterName) => {
-        setOpenCharacter((current) => (current === characterName ? null : characterName));
+                if (!ignore) {
+                    setProfileData(data);
+                }
+            } catch (err) {
+                if (!ignore) {
+                    setError(err.message);
+                }
+            } finally {
+                if (!ignore) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        loadProfile();
+
+        return () => {
+            ignore = true;
+        };
+    }, []);
+
+    const toggleCharacter = (characterKey) => {
+        setOpenCharacter((current) => (current === characterKey ? null : characterKey));
     };
 
-    const toggleCampaign = (campaignIndex) => {
-        setOpenCampaign((current) => (current === campaignIndex ? null : campaignIndex));
+    const toggleCampaign = (campaignKey) => {
+        setOpenCampaign((current) => (current === campaignKey ? null : campaignKey));
     };
 
-    const toggleClassSection = (characterName) => {
+    const toggleClassSection = (characterKey) => {
         setOpenClassSections((prev) => ({
             ...prev,
-            [characterName]: !prev[characterName]
+            [characterKey]: !prev[characterKey]
         }));
     };
 
-    const toggleRaceSection = (characterName) => {
+    const toggleRaceSection = (characterKey) => {
         setOpenRaceSections((prev) => ({
             ...prev,
-            [characterName]: !prev[characterName]
+            [characterKey]: !prev[characterKey]
         }));
     };
+
+    if (loading) {
+        return (
+            <div className="profile-page">
+                <div className="profile-header-bar">
+                    <h1>DNDatabase</h1>
+                </div>
+
+                <div className="profile-main">
+                    <div className="profile-shell">
+                        <p className="profile-empty-message">Loading profile...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="profile-page">
+                <div className="profile-header-bar">
+                    <h1>DNDatabase</h1>
+                </div>
+
+                <div className="profile-main">
+                    <div className="profile-shell">
+                        <p className="profile-empty-message">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!profileData || !profileData.user) {
+        return (
+            <div className="profile-page">
+                <div className="profile-header-bar">
+                    <h1>DNDatabase</h1>
+                </div>
+
+                <div className="profile-main">
+                    <div className="profile-shell">
+                        <p className="profile-empty-message">No profile data found.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    const currentUser = profileData.user;
+    const currentCharacters = profileData.characters || [];
+    const currentCampaigns = profileData.campaigns || [];
+
+    const characterCount = profileData.summary?.characterCount ?? currentCharacters.length;
+    const campaignCount = profileData.summary?.campaignCount ?? currentCampaigns.length;
 
     return (
         <div className="profile-page">
@@ -141,9 +191,9 @@ export default function Profile() {
                 <div className="profile-shell">
                     <div className="profile-top-row">
                         <div>
-                            <h2 className="profile-title">Profile</h2>
-                            <p className="profile-subtitle">
-                                Welcome back, @{currentUser.username}
+                            <h2 className="profile-home-title">Profile</h2>
+                            <p className="profile-home-subtitle">
+                                Welcome back, @{getValue(currentUser.username)}
                             </p>
                         </div>
 
@@ -164,10 +214,10 @@ export default function Profile() {
                         >
                             <div className="profile-account-main">
                                 <span className="profile-account-name">
-                                    {currentUser.firstName} {currentUser.lastName}
+                                    {getUserDisplayName(currentUser)}
                                 </span>
                                 <span className="profile-account-meta">
-                                    @{currentUser.username}
+                                    @{getValue(currentUser.username)}
                                 </span>
                             </div>
 
@@ -180,23 +230,27 @@ export default function Profile() {
                             <div className="profile-account-details">
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">ID</span>
-                                    <span className="profile-detail-value">{currentUser.id}</span>
+                                    <span className="profile-detail-value">{getValue(currentUser.id)}</span>
                                 </div>
+
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">Username</span>
-                                    <span className="profile-detail-value">{currentUser.username}</span>
+                                    <span className="profile-detail-value">{getValue(currentUser.username)}</span>
                                 </div>
+
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">Email</span>
-                                    <span className="profile-detail-value">{currentUser.email}</span>
+                                    <span className="profile-detail-value">{getValue(currentUser.email)}</span>
                                 </div>
+
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">First Name</span>
-                                    <span className="profile-detail-value">{currentUser.firstName}</span>
+                                    <span className="profile-detail-value">{getValue(currentUser.firstName)}</span>
                                 </div>
+
                                 <div className="profile-detail-row">
                                     <span className="profile-detail-label">Last Name</span>
-                                    <span className="profile-detail-value">{currentUser.lastName}</span>
+                                    <span className="profile-detail-value">{getValue(currentUser.lastName)}</span>
                                 </div>
                             </div>
                         )}
@@ -205,12 +259,12 @@ export default function Profile() {
                     <div className="profile-summary-grid">
                         <div className="profile-summary-card">
                             <span className="profile-summary-label">Characters</span>
-                            <span className="profile-summary-value">{currentCharacters.length}</span>
+                            <span className="profile-summary-value">{characterCount}</span>
                         </div>
 
                         <div className="profile-summary-card">
                             <span className="profile-summary-label">Campaigns</span>
-                            <span className="profile-summary-value">{currentCampaigns.length}</span>
+                            <span className="profile-summary-value">{campaignCount}</span>
                         </div>
                     </div>
 
@@ -224,33 +278,41 @@ export default function Profile() {
                                     </p>
                                 </div>
 
-                                <button type="button" className="profile-primary-button">
+                                <button
+                                    type="button"
+                                    className="profile-primary-button"
+                                    onClick={() => navigate("/CharacterCreation?create=true")}
+                                >
                                     Create New Character
                                 </button>
                             </div>
 
                             {currentCharacters.length > 0 ? (
                                 <div className="profile-accordion-list">
-                                    {currentCharacters.map((character) => {
-                                        const classDetails = CLASS_INFO[character.className];
-                                        const raceDetails = RACE_INFO[character.race];
-                                        const isCharacterOpen = openCharacter === character.name;
-                                        const isClassOpen = Boolean(openClassSections[character.name]);
-                                        const isRaceOpen = Boolean(openRaceSections[character.name]);
+                                    {currentCharacters.map((character, index) => {
+                                        const characterKey = character.id || getCharacterName(character) || index;
+                                        const characterName = getCharacterName(character);
+                                        const className = getCharacterClass(character);
+                                        const classDetails = character.classDetails || character.classInfo || null;
+                                        const raceDetails = character.raceDetails || character.raceInfo || null;
+
+                                        const isCharacterOpen = openCharacter === characterKey;
+                                        const isClassOpen = Boolean(openClassSections[characterKey]);
+                                        const isRaceOpen = Boolean(openRaceSections[characterKey]);
 
                                         return (
-                                            <div className="profile-accordion-card" key={character.name}>
+                                            <div className="profile-accordion-card" key={characterKey}>
                                                 <button
                                                     type="button"
                                                     className="profile-accordion-toggle"
-                                                    onClick={() => toggleCharacter(character.name)}
+                                                    onClick={() => toggleCharacter(characterKey)}
                                                 >
                                                     <div className="profile-accordion-main">
                                                         <span className="profile-accordion-title">
-                                                            {character.name}
+                                                            {characterName}
                                                         </span>
                                                         <span className="profile-accordion-meta">
-                                                            {character.race} • {character.className} • Level {character.level}
+                                                            {getValue(character.race)} • {className} • Level {getValue(character.level)}
                                                         </span>
                                                     </div>
 
@@ -264,27 +326,32 @@ export default function Profile() {
                                                         <div className="profile-detail-table">
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Name</span>
-                                                                <span className="profile-detail-value">{character.name}</span>
+                                                                <span className="profile-detail-value">{characterName}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Class</span>
-                                                                <span className="profile-detail-value">{character.className}</span>
+                                                                <span className="profile-detail-value">{className}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Race</span>
-                                                                <span className="profile-detail-value">{character.race}</span>
+                                                                <span className="profile-detail-value">{getValue(character.race)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Level</span>
-                                                                <span className="profile-detail-value">{character.level}</span>
+                                                                <span className="profile-detail-value">{getValue(character.level)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Background</span>
-                                                                <span className="profile-detail-value">{character.background}</span>
+                                                                <span className="profile-detail-value">{getValue(character.background)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">HP</span>
-                                                                <span className="profile-detail-value">{character.hp}</span>
+                                                                <span className="profile-detail-value">{getValue(character.hp)}</span>
                                                             </div>
                                                         </div>
 
@@ -293,43 +360,53 @@ export default function Profile() {
                                                                 <button
                                                                     type="button"
                                                                     className="profile-nested-toggle"
-                                                                    onClick={() => toggleClassSection(character.name)}
+                                                                    onClick={() => toggleClassSection(characterKey)}
                                                                 >
                                                                     <span>Class Info</span>
                                                                     <span>{isClassOpen ? "▾" : "▸"}</span>
                                                                 </button>
 
-                                                                {isClassOpen && classDetails && (
-                                                                    <div className="profile-detail-table profile-nested-table">
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Class</span>
-                                                                            <span className="profile-detail-value">{character.className}</span>
+                                                                {isClassOpen && (
+                                                                    classDetails ? (
+                                                                        <div className="profile-detail-table profile-nested-table">
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Class</span>
+                                                                                <span className="profile-detail-value">{className}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Primary Ability</span>
+                                                                                <span className="profile-detail-value">{getValue(classDetails.primaryAbility)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Hit Point Die</span>
+                                                                                <span className="profile-detail-value">{getValue(classDetails.hitPointDie)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Saving Throw Proficiencies</span>
+                                                                                <span className="profile-detail-value">{getValue(classDetails.savingThrowProficiencies)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Skill Proficiencies</span>
+                                                                                <span className="profile-detail-value">{getValue(classDetails.skillProficiencies)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Weapon Proficiencies</span>
+                                                                                <span className="profile-detail-value">{getValue(classDetails.weaponProficiencies)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Armor Proficiencies</span>
+                                                                                <span className="profile-detail-value">{getValue(classDetails.armorProficiencies)}</span>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Primary Ability</span>
-                                                                            <span className="profile-detail-value">{classDetails.primaryAbility}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Hit Point Die</span>
-                                                                            <span className="profile-detail-value">{classDetails.hitPointDie}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Saving Throw Proficiencies</span>
-                                                                            <span className="profile-detail-value">{classDetails.savingThrowProficiencies}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Skill Proficiencies</span>
-                                                                            <span className="profile-detail-value">{classDetails.skillProficiencies}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Weapon Proficiencies</span>
-                                                                            <span className="profile-detail-value">{classDetails.weaponProficiencies}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Armor Proficiencies</span>
-                                                                            <span className="profile-detail-value">{classDetails.armorProficiencies}</span>
-                                                                        </div>
-                                                                    </div>
+                                                                    ) : (
+                                                                        <p className="profile-empty-message">No class details found.</p>
+                                                                    )
                                                                 )}
                                                             </div>
 
@@ -337,31 +414,38 @@ export default function Profile() {
                                                                 <button
                                                                     type="button"
                                                                     className="profile-nested-toggle"
-                                                                    onClick={() => toggleRaceSection(character.name)}
+                                                                    onClick={() => toggleRaceSection(characterKey)}
                                                                 >
                                                                     <span>Race Info</span>
                                                                     <span>{isRaceOpen ? "▾" : "▸"}</span>
                                                                 </button>
 
-                                                                {isRaceOpen && raceDetails && (
-                                                                    <div className="profile-detail-table profile-nested-table">
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Race</span>
-                                                                            <span className="profile-detail-value">{character.race}</span>
+                                                                {isRaceOpen && (
+                                                                    raceDetails ? (
+                                                                        <div className="profile-detail-table profile-nested-table">
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Race</span>
+                                                                                <span className="profile-detail-value">{getValue(character.race)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Size</span>
+                                                                                <span className="profile-detail-value">{getValue(raceDetails.size)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Type</span>
+                                                                                <span className="profile-detail-value">{getValue(raceDetails.type)}</span>
+                                                                            </div>
+
+                                                                            <div className="profile-detail-row">
+                                                                                <span className="profile-detail-label">Speed</span>
+                                                                                <span className="profile-detail-value">{getValue(raceDetails.speed)}</span>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Size</span>
-                                                                            <span className="profile-detail-value">{raceDetails.size}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Type</span>
-                                                                            <span className="profile-detail-value">{raceDetails.type}</span>
-                                                                        </div>
-                                                                        <div className="profile-detail-row">
-                                                                            <span className="profile-detail-label">Speed</span>
-                                                                            <span className="profile-detail-value">{raceDetails.speed}</span>
-                                                                        </div>
-                                                                    </div>
+                                                                    ) : (
+                                                                        <p className="profile-empty-message">No race details found.</p>
+                                                                    )
                                                                 )}
                                                             </div>
                                                         </div>
@@ -385,7 +469,11 @@ export default function Profile() {
                                     </p>
                                 </div>
 
-                                <button type="button" className="profile-primary-button">
+                                <button
+                                    type="button"
+                                    className="profile-primary-button"
+                                    onClick={() => navigate("/Campaigns?create=true")}
+                                >
                                     Create New Campaign
                                 </button>
                             </div>
@@ -393,21 +481,22 @@ export default function Profile() {
                             {currentCampaigns.length > 0 ? (
                                 <div className="profile-accordion-list">
                                     {currentCampaigns.map((campaign, index) => {
-                                        const isCampaignOpen = openCampaign === index;
+                                        const campaignKey = campaign.id || `${getCampaignTitle(campaign)}-${index}`;
+                                        const isCampaignOpen = openCampaign === campaignKey;
 
                                         return (
-                                            <div className="profile-accordion-card" key={`${campaign.characters}-${index}`}>
+                                            <div className="profile-accordion-card" key={campaignKey}>
                                                 <button
                                                     type="button"
                                                     className="profile-accordion-toggle"
-                                                    onClick={() => toggleCampaign(index)}
+                                                    onClick={() => toggleCampaign(campaignKey)}
                                                 >
                                                     <div className="profile-accordion-main">
                                                         <span className="profile-accordion-title">
-                                                            {campaign.characters}
+                                                            {getCampaignTitle(campaign)}
                                                         </span>
                                                         <span className="profile-accordion-meta">
-                                                            {campaign.meetingTime} • Started {campaign.started}
+                                                            {getCampaignMeetingTime(campaign)} • Started {getCampaignStarted(campaign)}
                                                         </span>
                                                     </div>
 
@@ -421,27 +510,32 @@ export default function Profile() {
                                                         <div className="profile-detail-table">
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Player</span>
-                                                                <span className="profile-detail-value">{campaign.players}</span>
+                                                                <span className="profile-detail-value">{getCampaignPlayer(campaign)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Character</span>
-                                                                <span className="profile-detail-value">{campaign.characters}</span>
+                                                                <span className="profile-detail-value">{getCampaignCharacter(campaign)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Meeting Time</span>
-                                                                <span className="profile-detail-value">{campaign.meetingTime}</span>
+                                                                <span className="profile-detail-value">{getCampaignMeetingTime(campaign)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Started</span>
-                                                                <span className="profile-detail-value">{campaign.started}</span>
+                                                                <span className="profile-detail-value">{getCampaignStarted(campaign)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">Completed</span>
                                                                 <span className="profile-detail-value">{formatCompleted(campaign.completed)}</span>
                                                             </div>
+
                                                             <div className="profile-detail-row">
                                                                 <span className="profile-detail-label">DM ID</span>
-                                                                <span className="profile-detail-value">{campaign.dmId}</span>
+                                                                <span className="profile-detail-value">{getValue(campaign.dmId)}</span>
                                                             </div>
                                                         </div>
                                                     </div>
