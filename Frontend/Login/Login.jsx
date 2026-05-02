@@ -3,8 +3,24 @@ import { useNavigate } from 'react-router-dom'
 import './Login.css'
 
 
+<<<<<<< HEAD
 export default function login() {
  
+=======
+export default function Login() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const handleLogin = () => {
+        setError(" ");
+        if (!username.trim() || !password.trim()) {
+            setError("Please fill in both fields.");
+            return;
+        }
+    };
+
+>>>>>>> Tyler
     const navigate = useNavigate();
 
     return(
@@ -48,7 +64,7 @@ export default function login() {
 
                 
                 <div>
-                    <button className="login-button" onClick={() => navigate ("/Profile")}>Login</button>
+                    <button className="login-button" onClick={() => navigate("/Login")}>Login</button>
                 </div>
 
 

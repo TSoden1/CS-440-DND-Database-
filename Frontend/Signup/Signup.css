@@ -5,8 +5,8 @@
     background: #e0e0e0;
     width: 100vw;
     justify-content: flex-end;
-    position: fixed;
-    right: 0;
+    width: 100vw;
+    min-height: 100vh;
 }
 
 .header{
@@ -86,6 +86,7 @@
     font-size: 1.0rem;
     margin-top: 20px;
     border-radius: 100px;
+    cursor: pointer; 
 }
 
 .has-account{
