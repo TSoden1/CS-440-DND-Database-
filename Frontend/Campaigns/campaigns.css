@@ -1,0 +1,90 @@
+.page {
+    background-color: white;
+}
+
+.main-header {
+    text-align: center;
+    border: 2px solid #900B09;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px 20px;
+}
+
+.main-header h1 {
+    margin: 0;
+    flex-grow: 1; /* Allows title to take up space*/
+    text-align: center; /* Centers the text inside that space*/
+    color: black;
+}
+
+.spacer, .add-campaign-menu {
+    width: 50px; /* Give both side elements the same width for centering*/
+}
+
+.nav-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    
+}
+
+.add-campaign-menu {
+    display: flex;
+    justify-content: flex-end; /* Keeps menu on the right*/
+}
+
+.campaign-background-container {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background-color: lightgray;
+    padding: 0px 50px 0 50px;
+}
+
+.campaign-background-container div div {
+    padding: 10px;
+    text-align: center;
+    color: black
+}
+
+.campaign-header-item h2 {
+    color: black;
+    text-decoration: underline;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 50px;
+}
+
+.pop-up-menu {
+    position: fixed;
+    background-color: white;
+    max-width: 400px;
+    padding: 2rem;
+    border: 2px solid #900B09;
+}
+
+.pop-up-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+
+}
+
+.closeBtn {
+    display: flex;
+    justify-content: flex-end;
+}
