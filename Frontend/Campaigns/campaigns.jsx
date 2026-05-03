@@ -6,6 +6,10 @@ export default function campaigns() {
     const [campaigns, setCampaigns] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
 
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState("meetTime");
+    const [sortOrder, setSortOrder] = useState("asc");
+
     const [formValues, setFormValues] = useState({
         userName: "",
         charName: "",
@@ -34,7 +38,26 @@ export default function campaigns() {
     }
 
 
-
+    const filteredCampaigns = campaigns
+    .filter(c =>
+        c.charName.toLowerCase().includes(search.toLowerCase()) ||
+        c.userName.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+        if (sortBy === "meetTime") {
+        // Assume meetTime is a string like "2026-05-03 19:00:00" or similar
+        const aTime = new Date(a.meetTime);
+        const bTime = new Date(b.meetTime);
+        return sortOrder === "asc" ? aTime - bTime : bTime - aTime;
+        }
+        if (sortBy === "completed") {
+        // If you add a completed field (true/false), sort by it
+        const aVal = a.completed ? 1 : 0;
+        const bVal = b.completed ? 1 : 0;
+        return sortOrder === "asc" ? aVal - bVal : bVal - aVal;
+        }
+        return 0;
+    });
    
         
 return(
@@ -89,8 +112,25 @@ return(
             </div>
         </div> */}
 
+    <div style={{ display: "flex", gap: "1rem", margin: "1rem 0" }}>
+        <input
+            type="text"
+            placeholder="Search by campaign name"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+        />
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)}>
+            <option value="meetTime">Meet Time</option>
+            <option value="completed">Completed</option>
+        </select>
+        <select value={sortOrder} onChange={e => setSortOrder(e.target.value)}>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+    </div> 
+
         <div>
-            {campaigns.map((c, i) => (
+            {filteredCampaigns.map((c, i) => (
                 <div key={i} className="campaign-item-container container">
                     <div className="campaign-item">{c.userName}</div>
                     <div className="campaign-item">{c.charName}</div>
