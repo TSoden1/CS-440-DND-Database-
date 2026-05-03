@@ -17,15 +17,15 @@ export default function Signup() {
         e.preventDefault();
         setError("");
 
-        // if (!username.trim() || !password.trim() || !email.trim()) {
-        //     setError("Please fill in all fields.");
-        //     return;
-        // }
+         if (!username.trim() || !password.trim() || !email.trim()) {
+             setError("Please fill in all fields.");
+             return;
+         }
 
-        // if (password.length < 8) {
-        //     setError("Password must be at least 8 characters.");
-        //     return;
-        // }
+         if (password.length < 8) {
+             setError("Password must be at least 8 characters.");
+             return;
+         }
 
         try {
             const response = await axios.post('http://localhost:5173/Signup', {
@@ -33,11 +33,12 @@ export default function Signup() {
                 displayName,
                 email,
                 password
-            });
+            },
+            { withCredentials: true });
 
             if (response.status === 200) {
                 alert("Account created successfully!");
-                navigate("/Login"); //MAKE THIS NAV TO PROFILE
+                navigate("/Profile"); //MAKE THIS NAV TO PROFILE
             }
         } catch (err) {
             console.error(err);
@@ -58,6 +59,8 @@ export default function Signup() {
                 <div className="signup-header">
                     <h2 className="signup-title">Signup</h2>
                 </div>
+
+                {error && <p style={{ color: "red", fontSize: "0.85rem" }}>{error}</p>}
 
                 <div className="user-input">
                     <label>Email</label>
