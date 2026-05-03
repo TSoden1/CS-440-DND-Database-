@@ -178,7 +178,7 @@ app.post('/characters', (req, res) => {
                 return res.status(500).json({ message: "Failed to link character to user" });
             }
 
-            // Fetch full character with class and race details to return to frontend
+            //Fetch full character with class and race details to return to frontend
             const fetchSql = `
                 SELECT
                     c.characterID,
@@ -291,14 +291,13 @@ app.put('/characters/:id', (req, res) => {
     const { name, class: charClass, race, level, background, hp } = req.body;
     const characterID = req.params.id;
 
-    // Verify the character belongs to this user
     const verifySql = "SELECT * FROM userCharacters WHERE userID = ? AND characterID = ?";
     db.query(verifySql, [userID, characterID], (err, rows) => {
         if (err) return res.status(500).json({ message: "Database error" });
         if (rows.length === 0) return res.status(403).json({ message: "Not authorized" });
 
-        const updateSql = `UPDATE campaigns SET campaignName = ?, characterName = ?, 
-                   meetTime = ?, completed = ? WHERE campaignID = ?`;
+        const updateSql = `UPDATE characters SET characterName = ?, class = ?, races = ?, 
+                   charLevel = ?, background = ?, hp = ? WHERE characterID = ?`;
         db.query(updateSql, [name, charClass, race, level, background, hp, characterID], (err) => {
             if (err) return res.status(500).json({ message: "Failed to update character" });
             res.json({ message: "Character updated" });
@@ -318,7 +317,7 @@ app.delete('/characters/:id', (req, res) => {
         if (err) return res.status(500).json({ message: "Database error" });
         if (rows.length === 0) return res.status(403).json({ message: "Not authorized" });
 
-        // userCharacters row deleted automatically via ON DELETE CASCADE
+
         const deleteSql = "DELETE FROM characters WHERE characterID = ?";
         db.query(deleteSql, [characterID], (err) => {
             if (err) return res.status(500).json({ message: "Failed to delete character" });

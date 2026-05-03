@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getCurrentProfile, createCharacter, createCampaign,
          updateCharacter, deleteCharacter, updateCampaign, deleteCampaign  } from "./profileAPI.js";
 import CharacterCreation from "../CharacterCreation/CharacterCreation.jsx";
-import CampaignCreation from "../Campaign/campaigns.jsx";
+import CampaignCreation from "../Campaigns/campaigns.jsx";
 import "./Profile.css";
 
 function formatCompleted(completed) {
