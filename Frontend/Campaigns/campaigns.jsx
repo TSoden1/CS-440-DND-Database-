@@ -1,45 +1,59 @@
 import { useNavigate } from "react-router-dom";
 import {useState} from "react";
 import './campaigns.css'
-export default function campaigns() {
-    const navigate = useNavigate();
-    const [campaigns, setCampaigns] = useState([]);
-    const [showPopup, setShowPopup] = useState(false);
-
-    const [formValues, setFormValues] = useState({
-        userName: "",
-        charName: "",
-        meetTime: ""
-    });
+export default function CampaignCreation({ onCreateCampaign, onClose, initial }) {
+    const [submitting, setSubmitting] = useState(false);
+    const [formValues, setFormValues] = useState(
+        initial
+            ? { name: initial.name || "", charName: initial.characters || "", meetTime: initial.meetingTime || "" }
+            : { name: "", charName: "", meetTime: "" }
+    );
 
     const handleInput = (e) => {
         const {name, value } = e.target;
 
-        setFormValues({
-            ...formValues,
-            [name]: value
-        });
+        setFormValues(prev => ({ ...prev, [name]: value }));
     };
 
-    const newCampaign = () => {
-        setCampaigns([...campaigns, formValues]);
-
-        setFormValues({userName:"", charName:"", meetTime:""});
-
-        setShowPopup(false);
-    }
-
-    const closePopup = () => {
-        setShowPopup(false);
-    }
+    const handleSubmit = () => {
+        if (!formValues.name) return;
+        setSubmitting(true);
+        await onCreateCampaign(formValues);
+        setSubmitting(false);
+        onClose();
+    };
 
 
 
-   
-        
 return(
-<>
-<div class="page">
+    <div className="pop-up-overlay">
+        <div className="pop-up-menu">
+            <div className="closeBtn">
+                <button type ="button" onClick={onClose}>X</button>
+            </div>
+
+            {/*<h3>Enter in Your Name:</h3>
+            <input name="userName" value={FormData.userName} onChange={handleInput} type="text" />
+            */}
+            <h3>Enter Your Campaign Name:</h3>
+                <input name="name" value={formValues.name} onChange={handleInput} type="text" />
+
+             <h3>Enter Your Character Name:</h3>
+            <input name="charName" value={FormData.charName} onChange={handleInput} type="text" />
+
+            <h3>Enter in the Meet Time:</h3>
+            <input name="meetTime" value={formValues.meetTime} onChange={handleInput} type="text" />
+            <br />
+
+            <button onClick={handleSubmit} disabled={submitting}>
+                    {submitting ? "Saving..." : "Submit"}
+            </button>
+        </div>
+    </div>
+        
+    );
+}    
+{/*<div class="page">
         <title>Campaigns</title>
         <div className="nav-bar">
             <h4>Profile</h4>
@@ -56,9 +70,9 @@ return(
         </div>
     </div>
 
-    <div className="campaign-background-container">
+    <div className="campaign-background-container">*/}
         {/*Change to grid so that everything can line up properly*/}
-        <div className="campaign-header-container container">
+        {/*<div className="campaign-header-container container">
             <div className="campaign-header-item">
                 <h2>Name:</h2>
             </div>    
@@ -74,7 +88,7 @@ return(
             <div className="campaign-header-item">
                 <h2>Finished:</h2>
             </div>
-        </div>
+        </div>*/}
 {/* 
         <div className="campaign-item-container container">
             <div className="campaign-item">Frank</div>
@@ -89,7 +103,7 @@ return(
             </div>
         </div> */}
 
-        <div>
+       {/* <div>
             {campaigns.map((c, i) => (
                 <div key={i} className="campaign-item-container container">
                     <div className="campaign-item">{c.userName}</div>
@@ -107,31 +121,6 @@ return(
             ))}
         </div>
   </div>
-  </div>
+  </div>*/}
 
-{showPopup && (
-    <div className="pop-up-overlay">
-        <div className="pop-up-menu">
-            <div className="closeBtn">
-                <button onClick={closePopup}>X</button>
-            </div>
-
-            <h3>Enter in Your Name:</h3>
-            <input name="userName" value={FormData.userName} onChange={handleInput} type="text" />
-
-            <h3>Enter Your Character Name:</h3>
-            <input name="charName" value={FormData.charName} onChange={handleInput} type="text" />
-
-            <h3>Enter in the Meet Time:</h3>
-            <input name="meetTime" value={FormData.meetTime} onChange={handleInput} type="text" />
-
-            <br />
-
-            <button onClick={newCampaign}>Submit</button>
-        </div>
-    </div>
-        )}
-    
-</>
-);
-}
+{/*showPopup && (*/}
