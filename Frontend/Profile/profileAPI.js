@@ -65,7 +65,6 @@ const dummyProfile = {
             meetingTime: "6:00 PM",
             started: "2026-02-01",
             completed: false,
-            dmId: 3245
         },
         {
             id: 2,
@@ -75,7 +74,6 @@ const dummyProfile = {
             meetingTime: "9:00 PM",
             started: "2026-03-31",
             completed: true,
-            dmId: 4902
         }
     ],
 
@@ -152,19 +150,51 @@ const realProfileAPI = {
             method: "POST",
             body: JSON.stringify(character)
         });
+    },
+
+    updateCharacter(id, character) {
+        return request(`/characters/${id}`, { method: "PUT", body: JSON.stringify(character) });
+    },
+
+    deleteCharacter(id) {
+        return request(`/characters/${id}`, { method: "DELETE" });
+    },
+
+    updateCampaign(id, campaign) {
+        return request(`/campaigns/${id}`, { method: "PUT", body: JSON.stringify(campaign) });
+    },
+
+    deleteCampaign(id) {
+        return request(`/campaigns/${id}`, { method: "DELETE" });
     }
 };
 
 const activeProfileAPI = USE_DUMMY_PROFILE ? dummyProfileAPI : realProfileAPI;
 
-export function getCurrentProfile() {
+export async function getCurrentProfile() {
     return activeProfileAPI.getCurrentProfile();
 }
 
-export function createCampaign(campaign) {
+export async function createCampaign(campaign) {
     return activeProfileAPI.createCampaign(campaign);
 }
 
 export function createCharacter(character) {
     return activeProfileAPI.createCharacter(character);
+}
+
+export function updateCharacter(id, character) {
+    return activeProfileAPI.updateCharacter(id, character);
+}
+
+export function deleteCharacter(id) {
+    return activeProfileAPI.deleteCharacter(id);
+}
+
+export function updateCampaign(id, campaign) {
+    return activeProfileAPI.updateCampaign(id, campaign);
+}
+
+export function deleteCampaign(id) {
+    return activeProfileAPI.deleteCampaign(id);
 }
