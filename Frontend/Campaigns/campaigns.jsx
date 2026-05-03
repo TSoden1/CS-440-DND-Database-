@@ -1,45 +1,59 @@
 import { useNavigate } from "react-router-dom";
 import {useState} from "react";
+import {useEffect} from "react";
 import './campaigns.css'
+import axios from "axios"
+
 export default function campaigns() {
     const navigate = useNavigate();
     const [campaigns, setCampaigns] = useState([]);
     const [showPopup, setShowPopup] = useState(false);
 
     const [formValues, setFormValues] = useState({
-        userName: "",
-        charName: "",
-        meetTime: ""
+        campaignName: "",
+        characterName: "",
+        meetTime: "",
+        started: false,
+        completed: false
     });
 
     const handleInput = (e) => {
-        const {name, value } = e.target;
+        const {name, value, type, checked } = e.target;
 
         setFormValues({
             ...formValues,
-            [name]: value
+            [name]: type === "checkbox" ? checked : value
         });
     };
 
-    const newCampaign = () => {
-        setCampaigns([...campaigns, formValues]);
-
-        setFormValues({userName:"", charName:"", meetTime:""});
-
-        setShowPopup(false);
-    }
+    const newCampaign = async () => {
+        try {
+            const response = await axios.post('http://localhost:3000/Campaigns', formValues);
+        
+            setCampaigns(prev => [...prev, response.data]);
+            setFormValues({campaignName:"", characterName:"", meetTime:""});
+            setShowPopup(false);
+        } catch (error) {
+            console.error("Error submitting campaign:", error);
+        }        
+    };
 
     const closePopup = () => {
         setShowPopup(false);
     }
 
-
-
-   
-        
+    useEffect(() => {
+        axios.get("http://localhost:3000/Campaigns").then(res => {
+            setCampaigns(res.data);
+        })
+        .catch(err => {
+            console.error("Error fetching campaigns:", err);
+        });
+    }, []);
+     
 return(
 <>
-<div class="page">
+<div className="page">
         <title>Campaigns</title>
         <div className="nav-bar">
             <h4>Profile</h4>
@@ -60,7 +74,7 @@ return(
         {/*Change to grid so that everything can line up properly*/}
         <div className="campaign-header-container container">
             <div className="campaign-header-item">
-                <h2>Name:</h2>
+                <h2>Campaign Name:</h2>
             </div>    
             <div className="campaign-header-item">
                 <h2>My Character:</h2>
@@ -72,36 +86,24 @@ return(
                 <h2>Started:</h2>
             </div>
             <div className="campaign-header-item">
-                <h2>Finished:</h2>
+                <h2>Completed:</h2>
             </div>
         </div>
-{/* 
-        <div className="campaign-item-container container">
-            <div className="campaign-item">Frank</div>
-            <div className="campaign-item">Ricky</div>
-            <div className="campaign-item">12:00 Monday</div>
-            <div className="campaign-item">
-                <input type="checkbox" id="started-checkbox" name="started-checkbox" />
-            </div>
-            
-            <div className="campaign-item">
-                <input type="checkbox" id="finsihed-checkbox" name="finished-checkbox"/>
-            </div>
-        </div> */}
+
 
         <div>
             {campaigns.map((c, i) => (
                 <div key={i} className="campaign-item-container container">
-                    <div className="campaign-item">{c.userName}</div>
-                    <div className="campaign-item">{c.charName}</div>
+                    <div className="campaign-item">{c.campaignName}</div>
+                    <div className="campaign-item">{c.characterName}</div>
                     <div className="campaign-item">{c.meetTime}</div>
                     
                     <div className="campaign-item">
-                        <input type="checkbox" name="started-checkbox" />
+                        <input type="checkbox" name="started" checked={c.started} onChange={handleInput}/>
                     </div>
                     
                     <div className="campaign-item">
-                        <input type="checkbox" name="finished-checkbox"/>
+                        <input type="checkbox" name="completed" checked={c.completed} onChange={handleInput}/>
                     </div>
                 </div>            
             ))}
@@ -116,14 +118,14 @@ return(
                 <button onClick={closePopup}>X</button>
             </div>
 
-            <h3>Enter in Your Name:</h3>
-            <input name="userName" value={FormData.userName} onChange={handleInput} type="text" />
+            <h3>Enter in Your Campaign Name:</h3>
+            <input name="userName" value={FormData.campaignName} onChange={handleInput} type="text" />
 
             <h3>Enter Your Character Name:</h3>
-            <input name="charName" value={FormData.charName} onChange={handleInput} type="text" />
+            <input name="charName" value={FormData.characterName} onChange={handleInput} type="text" />
 
             <h3>Enter in the Meet Time:</h3>
-            <input name="meetTime" value={FormData.meetTime} onChange={handleInput} type="text" />
+            <input name="meetTime" value={FormData.meetTime} onChange={handleInput} type="datetime-local" />
 
             <br />
 
