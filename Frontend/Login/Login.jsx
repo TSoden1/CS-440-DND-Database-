@@ -8,7 +8,7 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         setError(" ");
         if (!username.trim() || !password.trim()) {
             setError("Please fill in both fields.");

@@ -15,7 +15,7 @@ export default function CampaignCreation({ onCreateCampaign, onClose, initial })
         setFormValues(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!formValues.name) return;
         setSubmitting(true);
         await onCreateCampaign(formValues);
