@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import './Login.css'
 
 
-export default function login() {
+export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -59,7 +59,7 @@ export default function login() {
 
                 
                 <div>
-                    <button className="login-button">Login</button>
+                    <button className="login-button" onClick={() => navigate("/Login")}>Login</button>
                 </div>
 
 
