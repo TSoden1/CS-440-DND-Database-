@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from 'react-router-dom'
 import './Login.css'
-
+import axios from "axios";
 
 export default function Login() {
     const [username, setUsername] = useState("");
@@ -14,6 +14,20 @@ export default function Login() {
             setError("Please fill in both fields.");
             return;
         }
+
+    try {
+        const response = await axios.post('http://localhost:3001/Login', 
+            { username, password },
+            { withCredentials: true }
+        );
+
+        if (response.status === 200) {
+            navigate("/Profile");
+        }
+    } catch (err) {
+        setError(err.response?.data?.message || "Invalid username or password");
+    }
+
     };
 
     const navigate = useNavigate();
@@ -32,11 +46,14 @@ export default function Login() {
                     <h2 className="login-title">Login</h2>
                 </div>
 
+                {error && <p style={{ color: "red", fontSize: "0.85rem" }}>{error}</p>}
 
                 <div className="user-input">
                     <label>Username</label>
                     <input
                         type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                         minlength="1"
                         maxLength="20"
                         placeholder="Enter username">
@@ -47,6 +64,8 @@ export default function Login() {
                     <label>Password</label>
                     <input 
                         type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         minlength="8"
                         placeholder="Enter password">
                     </input>
@@ -59,7 +78,7 @@ export default function Login() {
 
                 
                 <div>
-                    <button className="login-button" onClick={() => navigate("/Login")}>Login</button>
+                    <button className="login-button" onClick={handleLogin}>Login</button>
                 </div>
 
 
