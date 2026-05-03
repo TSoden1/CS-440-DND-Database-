@@ -13,7 +13,6 @@ const router = createBrowserRouter([
   { path: '/Login', element: <Login />},
   { path: '/Signup', element: <Signup/>},
   { path: '/Profile', element: <Profile/>},
-  { path: '/Campaigns', element: <Campaigns/>},
 ]);
 
 createRoot(document.getElementById('root')).render(
