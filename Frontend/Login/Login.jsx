@@ -3,10 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import './Login.css'
 
 
-<<<<<<< HEAD
-export default function login() {
- 
-=======
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -20,7 +16,6 @@ export default function Login() {
         }
     };
 
->>>>>>> Tyler
     const navigate = useNavigate();
 
     return(

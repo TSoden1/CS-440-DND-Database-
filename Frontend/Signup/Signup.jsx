@@ -4,10 +4,6 @@ import './Signup.css'
 import axios from "axios"
 
 
-<<<<<<< HEAD
-export default function signup() {
-    
-=======
 export default function Signup() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -15,7 +11,6 @@ export default function Signup() {
     const [error, setError] = useState("");
     const [displayName, setDisplayName] = useState("");
 
->>>>>>> Tyler
     const navigate = useNavigate();
 
     const handleSignup = async (e) => {
@@ -107,11 +102,7 @@ export default function Signup() {
                 </div>
 
                 <div>
-<<<<<<< HEAD
-                    <button className="signup-button" onClick={() => navigate("/Profile")}>Signup</button>
-=======
                     <button className="signup-button" onClick={handleSignup}>Signup</button>
->>>>>>> Tyler
                 </div>
 
                 <div className="has-account">
