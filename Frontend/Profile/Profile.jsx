@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentProfile } from "./profileAPI.js";
+import { getCurrentProfile, createCharacter, createCampaign,
+         updateCharacter, deleteCharacter, updateCampaign, deleteCampaign  } from "./profileAPI.js";
+import CharacterCreation from "../CharacterCreation/CharacterCreation.jsx";
+import CampaignCreation from "../Campaign/campaigns.jsx";
 import "./Profile.css";
 
 function formatCompleted(completed) {
-    if (completed === true) {
+    if (completed === true || completed === 1) {
         return "True";
     }
 
-    if (completed === false) {
+    if (completed === false || completed === 0) {
         return "False";
     }
 
@@ -49,7 +52,20 @@ function getCampaignCharacter(campaign) {
 }
 
 function getCampaignMeetingTime(campaign) {
-    return campaign.meetingTime || campaign.meetTime || "Not provided";
+        const val = campaign.meetingTime || campaign.meetTime;
+    if (!val) return "Not provided";
+
+    const date = new Date(val);
+    if (isNaN(date.getTime())) return val;
+
+    return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    });
 }
 
 function getCampaignPlayer(campaign) {
@@ -57,7 +73,10 @@ function getCampaignPlayer(campaign) {
 }
 
 function getCampaignStarted(campaign) {
-    return campaign.started || campaign.startDate || "Not provided";
+    const val = campaign.started ?? campaign.startDate;
+    if (val === true || val === 1) return "True";
+    if (val === false || val === 0) return "False";
+    return "Not provided";
 }
 
 export default function Profile() {
@@ -72,6 +91,13 @@ export default function Profile() {
     const [openCampaign, setOpenCampaign] = useState(null);
     const [openClassSections, setOpenClassSections] = useState({});
     const [openRaceSections, setOpenRaceSections] = useState({});
+
+    const [showCharacterForm, setShowCharacterForm] = useState(false);
+    const [showCampaignForm, setShowCampaignForm] = useState(false);
+
+    const [editingCharacter, setEditingCharacter] = useState(null);
+    const [editingCampaign, setEditingCampaign] = useState(null);
+
 
     useEffect(() => {
         let ignore = false;
@@ -124,6 +150,82 @@ export default function Profile() {
             ...prev,
             [characterKey]: !prev[characterKey]
         }));
+    };
+
+    const handleCreateCharacter = async (characterData) => {
+        const newCharacter = await createCharacter(characterData);
+        setProfileData((prev) => ({
+            ...prev,
+            characters: [...(prev.characters || []), newCharacter],
+            summary: {
+                ...prev.summary,
+                characterCount: (prev.summary?.characterCount ?? 0) + 1
+            }
+        }));
+    };
+
+    const handleCreateCampaign = async (campaignData) => {
+        const newCampaign = await createCampaign(campaignData);
+        setProfileData((prev) => ({
+            ...prev,
+            campaigns: [...(prev.campaigns || []), newCampaign],
+            summary: {
+                ...prev.summary,
+                campaignCount: (prev.summary?.campaignCount ?? 0) + 1
+            }
+        }));
+    };
+
+    const handleUpdateCharacter = async (id, updatedData) => {
+        await updateCharacter(id, updatedData);
+        setProfileData((prev) => ({
+            ...prev,
+            characters: prev.characters.map((c) =>
+                c.id === id ? { ...c, ...updatedData, className: updatedData.class } : c
+            )
+        }));
+        setEditingCharacter(null);
+    };
+
+    const handleDeleteCharacter = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this character?")) return;
+        await deleteCharacter(id);
+        setProfileData((prev) => ({
+            ...prev,
+            characters: prev.characters.filter((c) => c.id !== id),
+            summary: {
+                ...prev.summary,
+                characterCount: (prev.summary?.characterCount ?? 1) - 1
+            }
+        }));
+        setOpenCharacter(null);
+    };
+
+    const handleUpdateCampaign = async (id, updatedData) => {
+        await updateCampaign(id, updatedData);
+        setProfileData((prev) => ({
+            ...prev,
+            campaigns: prev.campaigns.map((c) =>
+                c.id === id
+                    ? { ...c, name: updatedData.name, characters: updatedData.charName, meetingTime: updatedData.meetTime }
+                    : c
+            )
+        }));
+        setEditingCampaign(null);
+    };
+
+    const handleDeleteCampaign = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this campaign?")) return;
+        await deleteCampaign(id);
+        setProfileData((prev) => ({
+            ...prev,
+            campaigns: prev.campaigns.filter((c) => c.id !== id),
+            summary: {
+                ...prev.summary,
+                campaignCount: (prev.summary?.campaignCount ?? 1) - 1
+            }
+        }));
+        setOpenCampaign(null);
     };
 
     if (loading) {
@@ -200,7 +302,13 @@ export default function Profile() {
                         <button
                             type="button"
                             className="profile-logout-button"
-                            onClick={() => navigate("/Login")}
+                            onClick={async () => {
+                                await fetch('http://localhost:3001/Logout', {
+                                    method: 'POST',
+                                    credentials: 'include'
+                                });
+                                navigate("/Login");
+                            }}
                         >
                             Logout
                         </button>
@@ -281,7 +389,7 @@ export default function Profile() {
                                 <button
                                     type="button"
                                     className="profile-primary-button"
-                                    onClick={() => navigate("/CharacterCreation?create=true")}
+                                    onClick={() => setShowCharacterForm(true)}
                                 >
                                     Create New Character
                                 </button>
@@ -353,6 +461,25 @@ export default function Profile() {
                                                                 <span className="profile-detail-label">HP</span>
                                                                 <span className="profile-detail-value">{getValue(character.hp)}</span>
                                                             </div>
+                                                        </div>
+
+                                                        {/*Edit and Delete Buttons for Characters*/}
+                                                        <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                                                            <button
+                                                                type="button"
+                                                                className="profile-primary-button"
+                                                                onClick={() => setEditingCharacter(character)}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="profile-primary-button"
+                                                                style={{ background: "#555" }}
+                                                                onClick={() => handleDeleteCharacter(character.id)}
+                                                            >
+                                                                Delete
+                                                            </button>
                                                         </div>
 
                                                         <div className="profile-nested-sections">
@@ -472,7 +599,7 @@ export default function Profile() {
                                 <button
                                     type="button"
                                     className="profile-primary-button"
-                                    onClick={() => navigate("/Campaigns?create=true")}
+                                    onClick={() => setShowCampaignForm(true)}
                                 >
                                     Create New Campaign
                                 </button>
@@ -533,10 +660,29 @@ export default function Profile() {
                                                                 <span className="profile-detail-value">{formatCompleted(campaign.completed)}</span>
                                                             </div>
 
-                                                            <div className="profile-detail-row">
+                                                            {/*<div className="profile-detail-row">
                                                                 <span className="profile-detail-label">DM ID</span>
                                                                 <span className="profile-detail-value">{getValue(campaign.dmId)}</span>
-                                                            </div>
+                                                            </div>*/
+                                                            }
+                                                        </div>
+                                                        {/*Edit and delete buttons for campaigns*/}
+                                                        <div style={{ display: "flex", gap: "10px", marginTop: "8px" }}>
+                                                            <button
+                                                                type="button"
+                                                                className="profile-primary-button"
+                                                                onClick={() => setEditingCampaign(campaign)}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="profile-primary-button"
+                                                                style={{ background: "#555" }}
+                                                                onClick={() => handleDeleteCampaign(campaign.id)}
+                                                            >
+                                                                Delete
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 )}
@@ -551,6 +697,36 @@ export default function Profile() {
                     </div>
                 </div>
             </div>
+            {/*Make modals for character and campaign creation and editing*/}
+            {showCharacterForm && (
+                <CharacterCreation
+                    onCreateCharacter={handleCreateCharacter}
+                    onClose={() => setShowCharacterForm(false)}
+                />
+            )}
+
+            {showCampaignForm && (
+                <CampaignCreation
+                    onCreateCampaign={handleCreateCampaign}
+                    onClose={() => setShowCampaignForm(false)}
+                />
+            )}
+
+            {editingCharacter && (
+                <CharacterCreation
+                    initial={editingCharacter}
+                    onCreateCharacter={(data) => handleUpdateCharacter(editingCharacter.id, data)}
+                    onClose={() => setEditingCharacter(null)}
+                />
+            )}
+
+            {editingCampaign && (
+                <CampaignCreation
+                    initial={editingCampaign}
+                    onCreateCampaign={(data) => handleUpdateCampaign(editingCampaign.id, data)}
+                    onClose={() => setEditingCampaign(null)}
+                />
+            )}
         </div>
     );
 }
