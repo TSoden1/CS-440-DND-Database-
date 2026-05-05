@@ -14,7 +14,8 @@ export default function campaigns() {
         characterName: "",
         meetTime: "",
         started: false,
-        completed: false
+        completed: false,
+        isDM: false
     });
 
     const handleInput = (e) => {
@@ -30,7 +31,7 @@ export default function campaigns() {
         try {
             const response = await axios.post('http://localhost:3000/Campaigns', formValues);
         
-            setCampaigns(prev => [...prev, response.data]);
+            setCampaigns(prev => [...prev, formValues]);
             setFormValues({campaignName:"", characterName:"", meetTime:""});
             setShowPopup(false);
         } catch (error) {
@@ -56,9 +57,9 @@ return(
 <div className="page">
         <title>Campaigns</title>
         <div className="nav-bar">
-            <h4>Profile</h4>
-            <h4>Characters</h4>
-            <h4>Campaigns</h4>
+            <h4 onClick={() => navigate('/Profile')}>Profile</h4>
+            <h4 onClick={() => navigate('/Characters')}>Characters</h4>
+            <h4 onClick={() => navigate('/Campaigns')}>Campaigns</h4>
         </div>
     <div className="main-header">
         <div className="spacer" /><h1>My Campaigns</h1>
@@ -88,12 +89,16 @@ return(
             <div className="campaign-header-item">
                 <h2>Completed:</h2>
             </div>
+            <div className="campaign-header-item">
+                <h2>Is DM?:</h2>
+            </div>
+            
         </div>
 
 
         <div>
             {campaigns.map((c, i) => (
-                <div key={i} className="campaign-item-container container">
+                <div key={c.id} className="campaign-item-container container">
                     <div className="campaign-item">{c.campaignName}</div>
                     <div className="campaign-item">{c.characterName}</div>
                     <div className="campaign-item">{c.meetTime}</div>
@@ -104,6 +109,10 @@ return(
                     
                     <div className="campaign-item">
                         <input type="checkbox" name="completed" checked={c.completed} onChange={handleInput}/>
+                    </div>
+
+                    <div className="campaign-item">
+                        <input type="checkbox" name="isDM" checked={c.isDM} onChange={handleInput}/>
                     </div>
                 </div>            
             ))}
@@ -119,13 +128,13 @@ return(
             </div>
 
             <h3>Enter in Your Campaign Name:</h3>
-            <input name="userName" value={FormData.campaignName} onChange={handleInput} type="text" />
+            <input name="campaignName" value={formValues.campaignName} onChange={handleInput} type="text" />
 
             <h3>Enter Your Character Name:</h3>
-            <input name="charName" value={FormData.characterName} onChange={handleInput} type="text" />
+            <input name="characterName" value={formValues.characterName} onChange={handleInput} type="text" />
 
             <h3>Enter in the Meet Time:</h3>
-            <input name="meetTime" value={FormData.meetTime} onChange={handleInput} type="datetime-local" />
+            <input name="meetTime" value={formValues.meetTime} onChange={handleInput} type="datetime-local" />
 
             <br />
 

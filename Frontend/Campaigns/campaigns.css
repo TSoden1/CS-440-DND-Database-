@@ -31,6 +31,10 @@
     
 }
 
+.nav-bar .h4:hover {
+    cursor: pointer;
+}
+
 .add-campaign-menu {
     display: flex;
     justify-content: flex-end; /* Keeps menu on the right*/
