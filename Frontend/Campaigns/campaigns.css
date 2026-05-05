@@ -1,5 +1,6 @@
 .page {
     background-color: white;
+    min-height: 100vh;
 }
 
 .main-header {
@@ -27,11 +28,10 @@
     flex-direction: row;
     justify-content: space-between;
     padding-left: 100px;
-    padding-right: 100px;
-    
+    padding-right: 100px;    
 }
 
-.nav-bar .h4:hover {
+.nav-bar h4:hover {
     cursor: pointer;
 }
 
@@ -43,9 +43,6 @@
 .campaign-background-container {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
     gap: 10px;
     background-color: lightgray;
     padding: 0px 50px 0 50px;
